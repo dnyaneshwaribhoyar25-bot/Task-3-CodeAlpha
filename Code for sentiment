@@ -1,0 +1,45 @@
+import pandas as pd
+import nltk
+from nltk.sentiment import SentimentIntensityAnalyzer
+import warnings
+warnings.filterwarnings('ignore')
+
+nltk.download('vader_lexicon', quiet=True)
+
+df = pd.DataFrame({
+    'product_name': ['Wireless Headphones', 'Smart Watch', 'Laptop Stand', 'Phone Case', 'Bluetooth Speaker'],
+    'rating': [5, 4, 3, 2, 5],
+    'review_text': [
+        'Amazing sound quality! Best headphones ever!',
+        'Good watch but battery life not great.',
+        'It works fine but nothing special.',
+        'Poor quality. Broke after 2 weeks.',
+        'Excellent speaker! Great sound!'
+    ]
+})
+
+sia = SentimentIntensityAnalyzer()
+
+results = []
+for row in df.iterrows():
+    row = row[1]
+    scores = sia.polarity_scores(row['review_text'])
+    compound = scores['compound']
+    sentiment = 'Positive' if compound >= 0.05 else 'Negative' if compound <= -0.05 else 'Neutral'
+    results.append({
+        'product': row['product_name'],
+        'rating': row['rating'],
+        'sentiment': sentiment,
+        'compound': compound
+    })
+
+sentiment_df = pd.DataFrame(results)
+
+print("\n" + "="*50)
+print("✅ TASK 4: SENTIMENT ANALYSIS")
+print("="*50)
+print(sentiment_df.to_string())
+print(f"\nAverage sentiment: {sentiment_df['compound'].mean():.3f}")
+
+sentiment_df.to_csv('sentiment_results.csv', index=False)
+print("✓ Saved: sentiment_results.csv")
